@@ -2,28 +2,19 @@ import json
 import os
 from googleapiclient.discovery import build
 
+
 class Channel:
-    """Класс для ютуб-канала."""
-
-    def __init__(self, channel_id: str) -> None:
-        """Инициализирует экземпляр класса Channel с заданным ID канала.
-
-        Args:
-            channel_id (str): ID YouTube-канала.
-        """
+    def __init__(self, channel_id: str):
         self.channel_id = channel_id
         self.api_key = os.getenv('YT_API_KEY')
         if not self.api_key:
             raise ValueError("API ключ не найден в переменных окружения.")
+
+        # Инициализируем атрибуты данными из YouTube API
         self.channel_info = self.get_channel_info()
 
-    def get_channel_info(self) -> dict:
-        """Получает информацию о канале с помощью YouTube API и возвращает её в виде словаря.
-
-        Returns:
-            dict: Словарь с информацией о канале.
-        """
-        youtube = build('youtube', 'v3', developerKey=self.api_key)
+    def get_channel_info(self):
+        youtube = self.get_service()
 
         response = youtube.channels().list(
             part='snippet,statistics',
@@ -49,8 +40,7 @@ class Channel:
         else:
             return None
 
-    def print_info(self) -> None:
-        """Выводит информацию о канале в консоль без лишних скобок и кавычек."""
+    def print_info(self):
         if self.channel_info:
             print("Информация о канале:")
             print(f"id канала: {self.channel_info['id канала']}")
@@ -63,12 +53,7 @@ class Channel:
         else:
             print("Канал не найден или произошла ошибка при получении данных.")
 
-    def to_json(self, filename: str) -> None:
-        """Сохраняет значения атрибутов экземпляра в файл в формате JSON.
-
-        Args:
-            filename (str): Имя файла, в который будут сохранены данные.
-        """
+    def to_json(self, filename: str):
         if self.channel_info:
             with open(filename, 'w', encoding='utf-8') as file:
                 json.dump(self.channel_info, file, ensure_ascii=False, indent=2)
@@ -76,22 +61,36 @@ class Channel:
         else:
             print("Невозможно сохранить данные, так как канал не найден или произошла ошибка при получении данных.")
 
+    def __str__(self):
+        return f"{self.channel_info['Название канала']} ({self.channel_info['Ссылка на канал']})"
+
+    def __add__(self, other):
+        if isinstance(other, Channel):
+            return int(self.channel_info['Количество подписчиков']) + int(other.channel_info['Количество подписчиков'])
+        else:
+            raise TypeError("Unsupported operand type for +: 'Channel' and {}".format(type(other)))
+
+    def __sub__(self, other):
+        if isinstance(other, Channel):
+            return int(self.channel_info['Количество подписчиков']) - int(other.channel_info['Количество подписчиков'])
+        else:
+            raise TypeError("Unsupported operand type for -: 'Channel' and {}".format(type(other)))
+
+    def __lt__(self, other):
+        if isinstance(other, Channel):
+            return int(self.channel_info['Количество подписчиков']) < int(other.channel_info['Количество подписчиков'])
+        else:
+            raise TypeError("Unsupported operand type for <: 'Channel' and {}".format(type(other)))
+
+    def __ge__(self, other):
+        if isinstance(other, Channel):
+            return int(self.channel_info['Количество подписчиков']) >= int(other.channel_info['Количество подписчиков'])
+        else:
+            raise TypeError("Unsupported operand type for >=: 'Channel' and {}".format(type(other)))
+
     @classmethod
     def get_service(cls):
-        """Возвращает объект для работы с YouTube API.
-
-        Returns:
-            googleapiclient.discovery.Resource: Объект для работы с YouTube API.
-        """
         api_key = os.getenv('YT_API_KEY')
         if not api_key:
             raise ValueError("API ключ не найден в переменных окружения.")
         return build('youtube', 'v3', developerKey=api_key)
-
-def printj(dict_to_print: dict) -> None:
-    """Выводит словарь в json-подобном удобном формате с отступами.
-
-    Args:
-        dict_to_print (dict): Словарь для вывода.
-    """
-    print(json.dumps(dict_to_print, indent=2, ensure_ascii=False))
