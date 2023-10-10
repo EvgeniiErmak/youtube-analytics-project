@@ -2,9 +2,16 @@ import json
 import os
 from googleapiclient.discovery import build
 
-class Channel:
+class BaseService:
+    @classmethod
+    def get_service(cls):
+        api_key = os.getenv('YT_API_KEY')
+        if not api_key:
+            raise ValueError("API ключ не найден в переменных окружения.")
+        return build('youtube', 'v3', developerKey=api_key)
+
+class Channel(BaseService):
     def __init__(self, channel_id: str) -> None:
-        """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.__channel_id = channel_id
         self._init_from_api()
 
@@ -76,10 +83,3 @@ class Channel:
             return int(self.subscriber_count) >= int(other.subscriber_count)
         else:
             raise TypeError("Unsupported operand type for >=: 'Channel' and {}".format(type(other)))
-
-    @classmethod
-    def get_service(cls):
-        api_key = os.getenv('YT_API_KEY')
-        if not api_key:
-            raise ValueError("API ключ не найден в переменных окружения.")
-        return build('youtube', 'v3', developerKey=api_key)
