@@ -8,6 +8,7 @@ class PlayList(BaseService):
         self.playlist_id = playlist_id
         self.title, self.url = self.get_playlist_info()
 
+
     def get_playlist_info(self):
         try:
             response = self.get_service().playlists().list(part='snippet', id=self.playlist_id).execute()
@@ -23,6 +24,8 @@ class PlayList(BaseService):
             raise ValueError(f"Ошибка при получении информации о плейлисте: {str(e)}")
 
     @property
+
+
     def total_duration(self):
         try:
             response = self.get_service().playlistItems().list(part='contentDetails', playlistId=self.playlist_id).execute()
@@ -45,6 +48,7 @@ class PlayList(BaseService):
         except Exception as e:
             raise ValueError(f"Ошибка при вычислении общей длительности: {str(e)}")
 
+
     def parse_duration(self, duration):
         # Функция для преобразования строки продолжительности в объект datetime.timedelta
         time_elements = duration.split('T')[1]
@@ -64,6 +68,7 @@ class PlayList(BaseService):
             seconds = int(time_elements.split('S')[0])
 
         return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+
 
     def show_best_video(self):
         try:
