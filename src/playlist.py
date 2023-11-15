@@ -2,12 +2,12 @@ import isodate
 import datetime
 from src.channel import BaseService
 
+
 class PlayList(BaseService):
     def __init__(self, playlist_id):
         super().__init__()
         self.playlist_id = playlist_id
         self.title, self.url = self.get_playlist_info()
-
 
     def get_playlist_info(self):
         try:
